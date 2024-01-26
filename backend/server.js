@@ -1,12 +1,16 @@
 import express from "express";
-import { chats } from "./data/data.js";
 import dotenv from "dotenv";
-
+import { connectDB } from "./config/db.config.js";
+import userRoutes from "./routes/userRoutes.js";
+import { errorHandler, notFound } from "./middleware/errorHandler.middleware.js";
 const app = express();
 
 dotenv.config({
   path: "./.env",
 });
+
+app.use(express.json())
+connectDB();
 
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -14,19 +18,9 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/api/chats", (req, res) => {
-  res.status(200).json({
-    chats,
-  });
-});
-
-app.get("/api/chats/:id", (req, res) => {
-  let singleChat = chats.find((c) => c._id == req.params?.id);
-
-  res.status(200).json({
-    singleChat,
-  });
-});
+app.use("/api/users", userRoutes);
+app.use(notFound);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 8000;
 
